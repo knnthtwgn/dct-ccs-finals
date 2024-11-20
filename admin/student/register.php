@@ -1,7 +1,9 @@
 <?php
 $title = "Register a New Student"; // Set the title for the page
+require_once '../../functions.php';
 require_once '../partials/header.php'; 
 require_once '../partials/side-bar.php'; 
+guard();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -20,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'last_name' => trim($_POST['last_name'] ?? '') // Clean last name input
     ];
 
-    // Validate the input student data
     $errors = validateStudentData($student_data);
 
     // Proceed if no validation errors
@@ -123,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </thead>
         <tbody>
             <?php
-            $connection = db_connect(); // Establish connection to the database
+            $connection = getDatabaseConnection(); // Establish connection to the database
             $query = "SELECT * FROM students"; // Query to fetch all students
             $result = $connection->query($query); // Execute the query
 
