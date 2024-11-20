@@ -1,5 +1,6 @@
 <?php
 $title = "Attach a Subject"; // Page title definition
+require_once '../../functions.php';
 require_once '../partials/header.php'; // Including header part of the page
 require_once '../partials/side-bar.php'; // Including sidebar part of the page
 guard(); // Ensuring that the user is authenticated
