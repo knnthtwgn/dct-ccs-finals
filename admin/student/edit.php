@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_student'])) {
             $error_message = "First Name and Last Name are required."; // Error if fields are empty
         } else {
             // Proceed with database update
-            $connection = db_connect(); // Connect to the database
+            $connection = getDatabaseConnection(); // Connect to the database
             $query = "UPDATE students SET first_name = ?, last_name = ? WHERE id = ?"; // Update query
             $stmt = $connection->prepare($query); // Prepare the statement
             $stmt->bind_param('ssi', $updated_data['first_name'], $updated_data['last_name'], $student_id); // Bind parameters
