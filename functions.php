@@ -163,7 +163,7 @@ function validateStudentData($student_data) {
         $errors[] = "Last Name is required.";
     }
 
-   
+
     return $errors;
 }
 
@@ -179,11 +179,13 @@ function checkDuplicateStudentData($student_data) {
         return "Student ID already exists.";
     }
 
+
     return '';
 }
 
 function generateUniqueIdForStudents() {
     $connection = getDatabaseConnection();
+
 
     $query = "SELECT MAX(id) AS max_id FROM students";
     $result = $connection->query($query);
@@ -192,6 +194,6 @@ function generateUniqueIdForStudents() {
 
     $connection->close();
 
-    return $max_id + 1; 
+
 }
 ?>
