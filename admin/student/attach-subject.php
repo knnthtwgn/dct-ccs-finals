@@ -15,6 +15,7 @@ require_once '../partials/side-bar.php';
         </ol>
     </nav>
 
+    <!-- Error and success alerts -->
     <div class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">
         Error message placeholder.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -25,6 +26,7 @@ require_once '../partials/side-bar.php';
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
+    <!-- Student Information Section -->
     <div class="card">
         <div class="card-body">
             <p><strong>Selected Student Information:</strong></p>
@@ -33,6 +35,7 @@ require_once '../partials/side-bar.php';
                 <li><strong>Name:</strong> [First Name] [Last Name]</li>
             </ul>
 
+            <!-- Subject Selection Form -->
             <form method="post" action="">
                 <p><strong>Select Subjects to Attach:</strong></p>
                 <div class="form-check">
@@ -46,6 +49,7 @@ require_once '../partials/side-bar.php';
 
     <hr>
 
+    <!-- Attached Subject List -->
     <h3>Attached Subject List</h3>
     <table class="table">
         <thead>
