@@ -145,6 +145,7 @@ function renderAlert($messages, $type = 'danger') {
 
     return $html;
 }
+
 function generateValidStudentId($original_id) {
     // Truncate to the first 4 characters
     return substr($original_id, 0, 4);
@@ -162,7 +163,7 @@ function validateStudentData($student_data) {
         $errors[] = "Last Name is required.";
     }
 
-    // Removed the var_dump debug
+
     return $errors;
 }
 
@@ -178,14 +179,14 @@ function checkDuplicateStudentData($student_data) {
         return "Student ID already exists.";
     }
 
-    // Removed the var_dump debug
+
     return '';
 }
 
 function generateUniqueIdForStudents() {
     $connection = getDatabaseConnection();
 
-    // Find the maximum current ID and add 1 to it
+
     $query = "SELECT MAX(id) AS max_id FROM students";
     $result = $connection->query($query);
     $row = $result->fetch_assoc();
@@ -193,20 +194,6 @@ function generateUniqueIdForStudents() {
 
     $connection->close();
 
-    return $max_id + 1; // Generate the next unique ID
-}
-function getSelectedStudentData($student_id) {
-    $connection = getDatabaseConnection();
-    $query = "SELECT * FROM students WHERE id = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param('i', $student_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $student = $result->fetch_assoc();
 
-    $stmt->close();
-    $connection->close();
-
-    return $student;
 }
 ?>
