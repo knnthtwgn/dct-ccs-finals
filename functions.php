@@ -1,34 +1,15 @@
 <?php
-// Authenticate the user with given email and password.
-function authenticateUser($email, $password) {
-    $connection = getDatabaseConnection();
-    $password_hash = md5($password);
-
-    // Prepare and execute the SQL query to fetch user data.
-    $query = "SELECT * FROM users WHERE email = ? AND password = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param('ss', $email, $password_hash);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Check if user exists and store session data.
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['name'] = $user['name'];
-        $_SESSION['email'] = $user['email'];
-        return $user;
-    }
-
-    return false; // Return false if user not found.
-}
 
 // Start session if not already started.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Establish and return a database connection.
+/**
+ * Establish and return a database connection.
+ *
+ * @return mysqli|null Database connection object, or null if connection fails.
+ */
 function getDatabaseConnection() {
     $db_config = [
         'host' => 'localhost',
@@ -48,23 +29,111 @@ function getDatabaseConnection() {
     // Check if connection was successful and log error if not.
     if ($connection->connect_error) {
         error_log("Connection failed: " . $connection->connect_error, 3, '/var/log/db_errors.log');
-        return null;
+        return null; // Return null if connection failed.
     }
 
     return $connection; // Return the connection object.
 }
 
-// Render alert messages as HTML.
-function displayAlertMessages($messages, $type = 'danger') {
-    if (empty($messages)) {
-        return ''; // Return empty string if no messages.
-    }
-    
-    if (!is_array($messages)) {
-        $messages = [$messages]; // Convert to array if not already.
+/**
+ * Authenticate the user with given email and password.
+ *
+ * @param string $email User's email address.
+ * @param string $password User's plain-text password.
+ * @return array|bool User data if authentication is successful, false otherwise.
+ */
+function authenticateUser($email, $password) {
+    $connection = getDatabaseConnection(); // Get a database connection.
+    if (!$connection) {
+        return false; // Return false if connection failed.
     }
 
-    // Generate HTML for alert messages.
+    $password_hash = md5($password); // Hash the password using MD5 (note: not secure, consider using password_hash()).
+
+    // Prepare and execute the SQL query to fetch user data.
+    $query = "SELECT * FROM users WHERE email = ? AND password = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('ss', $email, $password_hash);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Check if user exists and store session data.
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['name'] = $user['name'];
+        $_SESSION['email'] = $user['email'];
+        return $user; // Return user data if authentication is successful.
+    }
+
+    return false; // Return false if user not found.
+}
+
+
+function guard() {
+    if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $host = $_SERVER['HTTP_HOST'];
+        $baseURL = $protocol . $host . '/'; 
+
+        header("Location: " . $baseURL);
+        exit();
+    }
+}
+
+// Function to check for duplicate subject data or subject name in the database
+function checkDuplicateSubject($subject_code, $subject_name) {
+    $connection = getDatabaseConnection();
+    
+    // Check for duplicate subject code
+    $query = "SELECT * FROM subjects WHERE subject_code = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('s', $subject_code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        return "Subject code already exists. Please choose another."; // Return the error message for duplicate code
+    }
+    
+    // Check for duplicate subject name
+    $query = "SELECT * FROM subjects WHERE subject_name = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('s', $subject_name);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        return "Subject name already exists. Please choose another."; // Return the error message for duplicate name
+    }
+    
+    return ''; // No duplicate found
+}
+
+function displayErrors($errors) {
+    if (empty($errors)) {
+        return '';
+    }
+    $html = '<div class="alert alert-danger alert-dismissible fade show" role="alert">';
+    $html .= '<strong>Validation Errors:</strong><ul>';
+    foreach ($errors as $error) {
+        $html .= '<li>' . htmlspecialchars($error) . '</li>';
+    }
+    $html .= '</ul>';
+    $html .= '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    $html .= '</div>';
+    return $html;
+}
+
+function renderAlert($messages, $type = 'danger') {
+    if (empty($messages)) {
+        return '';
+    }
+    // Ensure messages is an array
+    if (!is_array($messages)) {
+        $messages = [$messages];
+    }
+
     $html = '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert">';
     $html .= '<ul>';
     foreach ($messages as $message) {
@@ -74,7 +143,6 @@ function displayAlertMessages($messages, $type = 'danger') {
     $html .= '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
     $html .= '</div>';
 
-    return $html; // Return the generated HTML.
+    return $html;
 }
-
 ?>
