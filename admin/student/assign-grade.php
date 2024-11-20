@@ -1,60 +1,88 @@
 <?php
-ob_start(); // Start output buffering
-$title = "Assign Grade"; // Set the title
-require_once '../../functions.php'; // Contains the database connection function
+ob_start(); // Begin output buffering to control output flow
+$title = "Assign Grade"; // Page title for the header
+require_once '../../functions.php';
 require_once '../partials/header.php';
 require_once '../partials/side-bar.php';
+guard(); // Ensure only authorized users can access the page
 
+// Enable error reporting for development purposes
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Initialize feedback messages
 $error_message = '';
 $success_message = '';
-$record_id = $_GET['id'] ?? null;
-$student_info = null;
 
-// Database connection
-$conn = getDatabaseConnection(); 
+// Determine the record ID based on POST or GET request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+    $record_id = intval($_POST['id']);
+} elseif (isset($_GET['id'])) {
+    $record_id = intval($_GET['id']);
+} else {
+    header("Location: attach-subject.php"); // Redirect if no valid ID is provided
+    exit;
+}
 
-// Fetch student and subject information
-if ($record_id) {
-    $stmt = $conn->prepare("SELECT student_id, student_name, subject_code, subject_name, grade FROM student_subject_grades WHERE id = ?");
-    $stmt->bind_param("i", $record_id);
+if (!empty($record_id)) {
+    // Establish a database connection and validate it
+    $connection = getDatabaseConnection();
+
+    if (!$connection || $connection->connect_error) {
+        die("Failed to connect to the database: " . $connection->connect_error);
+    }
+
+    // Retrieve relevant data about the student, subject, and grade
+    $query = "SELECT students.id AS student_id, students.first_name, students.last_name, 
+                     subjects.subject_code, subjects.subject_name, students_subjects.grade 
+              FROM students_subjects 
+              JOIN students ON students_subjects.student_id = students.id 
+              JOIN subjects ON students_subjects.subject_id = subjects.id 
+              WHERE students_subjects.id = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('i', $record_id);
     $stmt->execute();
     $result = $stmt->get_result();
+
     if ($result->num_rows > 0) {
-        $student_info = $result->fetch_assoc();
-    } else {
-        $error_message = "Record not found.";
-    }
-    $stmt->close();
-} else {
-    $error_message = "No record ID provided.";
-}
+        $record = $result->fetch_assoc();
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_grade'])) {
-    $grade = $_POST['grade'] ?? '';
+        // Handle form submission for grade assignment
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['assign_grade'])) {
+            $grade = $_POST['grade'];
 
-    // Validate grade
-    if (empty($grade)) {
-        $error_message = "Grade cannot be blank.";
-    } elseif (!is_numeric($grade) || $grade < 0 || $grade > 100) {
-        $error_message = "Grade must be a numeric value between 0 and 100.";
-    }
+            // Validate the grade input
+            if (empty($grade)) {
+                $error_message = "Grade is required.";
+            } elseif (!is_numeric($grade) || $grade < 0 || $grade > 100) {
+                $error_message = "Please enter a valid grade between 0 and 100.";
+            } else {
+                $grade = floatval($grade);
 
-    if (empty($error_message)) {
-        // Update the grade in the database
-        $stmt = $conn->prepare("UPDATE student_subject_grades SET grade = ? WHERE id = ?");
-        $stmt->bind_param("di", $grade, $record_id);
-        if ($stmt->execute()) {
-            $success_message = "Grade successfully assigned.";
-            $student_info['grade'] = $grade; // Update local variable
-        } else {
-            $error_message = "Failed to assign the grade. Please try again.";
+                // Update the database with the assigned grade
+                $update_query = "UPDATE students_subjects SET grade = ? WHERE id = ?";
+                $update_stmt = $connection->prepare($update_query);
+                $update_stmt->bind_param('di', $grade, $record_id);
+
+                if ($update_stmt->execute()) {
+                    // Redirect to the attach page after successful update
+                    $success_message = "Grade assigned successfully.";
+                    header("Location: attach-subject.php?id=" . htmlspecialchars($record['student_id']));
+                    exit;
+                } else {
+                    $error_message = "Failed to assign grade. Please try again.";
+                }
+            }
         }
-        $stmt->close();
+    } else {
+        header("Location: attach-subject.php"); // Redirect if no record found
+        exit;
     }
+} else {
+    header("Location: attach-subject.php"); // Redirect if no valid ID is provided
+    exit;
 }
-
-$conn->close();
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
@@ -64,12 +92,11 @@ $conn->close();
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="../dashboard.php">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="../student/register.php">Register Student</a></li>
-            <li class="breadcrumb-item"><a href="attach-subject.php?id=<?php echo htmlspecialchars($student_info['student_id'] ?? ''); ?>">Attach Subject to Student</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Assign Grade to Subject</li>
+            <li class="breadcrumb-item"><a href="attach-subject.php?id=<?php echo htmlspecialchars($record['student_id'] ?? ''); ?>">Attach Subject to Student</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Assign Grade</li>
         </ol>
     </nav>
 
-    <!-- Alert messages for errors or success -->
     <?php if (!empty($error_message)): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <?php echo htmlspecialchars($error_message); ?>
@@ -82,32 +109,30 @@ $conn->close();
         </div>
     <?php endif; ?>
 
-    <!-- Selected student and subject details -->
-    <div class="card">
-        <div class="card-body">
-            <h5>Selected Student and Subject Information</h5>
-            <?php if ($student_info): ?>
+    <?php if (isset($record)): ?>
+        <div class="card">
+            <div class="card-body">
+                <h5>Student and Subject Details</h5>
                 <ul>
-                    <li><strong>Student ID:</strong> <?php echo htmlspecialchars($student_info['student_id']); ?></li>
-                    <li><strong>Name:</strong> <?php echo htmlspecialchars($student_info['student_name']); ?></li>
-                    <li><strong>Subject Code:</strong> <?php echo htmlspecialchars($student_info['subject_code']); ?></li>
-                    <li><strong>Subject Name:</strong> <?php echo htmlspecialchars($student_info['subject_name']); ?></li>
+                    <li><strong>Student ID:</strong> <?php echo htmlspecialchars($record['student_id']); ?></li>
+                    <li><strong>Name:</strong> <?php echo htmlspecialchars($record['first_name'] . ' ' . $record['last_name']); ?></li>
+                    <li><strong>Subject Code:</strong> <?php echo htmlspecialchars($record['subject_code']); ?></li>
+                    <li><strong>Subject Name:</strong> <?php echo htmlspecialchars($record['subject_name']); ?></li>
                 </ul>
 
                 <form method="post">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($record_id); ?>">
                     <div class="mb-3">
                         <label for="grade" class="form-label">Grade</label>
-                        <input type="number" step="0.01" class="form-control" id="grade" name="grade" value="<?php echo htmlspecialchars($student_info['grade']); ?>">
+                        <input type="number" step="0.01" class="form-control" id="grade" name="grade" value="<?php echo htmlspecialchars($record['grade']); ?>">
                     </div>
-                    <a href="attach-subject.php?id=<?php echo htmlspecialchars($student_info['student_id']); ?>" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" name="assign_grade" class="btn btn-primary">Assign Grade to Subject</button>
+                    <a href="attach-subject.php?id=<?php echo htmlspecialchars($record['student_id']); ?>" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" name="assign_grade" class="btn btn-primary">Assign Grade</button>
                 </form>
-            <?php else: ?>
-                <p>No student information available.</p>
-            <?php endif; ?>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 </main>
 
 <?php require_once '../partials/footer.php'; ?>
-<?php ob_end_flush(); // Flush output buffer ?>
+<?php ob_end_flush(); // Send the output buffer contents ?>
