@@ -14,7 +14,11 @@ require_once '../partials/side-bar.php';
             <li class="breadcrumb-item active" aria-current="page">Register Student</li>
         </ol>
     </nav>
+
+   
     <div>
+        <?php
+        ?>
     </div>
 
     <form method="post" action="">
@@ -49,7 +53,33 @@ require_once '../partials/side-bar.php';
                 <th scope="col">Actions</th>
             </tr>
         </thead>
-        <tbody>       
+        <tbody>
+            <?php
+            // Connect to the database
+            $connection = getDatabaseConnection();
+
+            // Query to fetch all students from the database
+            $query = "SELECT * FROM students";
+            $result = $connection->query($query);
+
+            // Check if there are any students and display them in the table
+            while ($student = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($student['student_id']); ?></td>
+                    <td><?php echo htmlspecialchars($student['first_name']); ?></td>
+                    <td><?php echo htmlspecialchars($student['last_name']); ?></td>
+                    <td>
+                        <a href="edit.php?id=<?php echo $student['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="delete.php?id=<?php echo $student['id']; ?>" class="btn btn-sm btn-danger">Delete</a>
+                        <a href="attach-subject.php?id=<?php echo $student['id']; ?>" class="btn btn-sm btn-warning">Attach Subject</a>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+
+            <?php
+            // Close the database connection
+            $connection->close();
+            ?>
         </tbody>
     </table>
 </main>
