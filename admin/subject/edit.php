@@ -1,9 +1,11 @@
 <?php
-require_once(__DIR__ .'/../../functions.php');
+ob_start(); // Start output buffering
+require_once(__DIR__ . '/../../functions.php');
 require_once '../partials/header.php';
 require_once '../partials/side-bar.php';
 guard();
 
+// Check if 'id' is set in the URL
 if (isset($_GET['id'])) {
     $subject_id = $_GET['id'];
 
@@ -19,17 +21,20 @@ if (isset($_GET['id'])) {
         $subject_code = $subject['subject_code'];
         $subject_name = $subject['subject_name'];
     } else {
-        header("Location: ../subject/add.php"); // Redirect to the subjects list
+        // Redirect if subject not found
+        header("Location: ../subject/add.php");
         exit;
     }
 } else {
-    header("Location: ../subject/add.php"); // Redirect to the subjects list
+    // Redirect if 'id' not set
+    header("Location: ../subject/add.php");
     exit;
 }
 
 $error_message = '';
 $success_message = '';
 
+// Handle the form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
     $subject_code = trim($_POST['subject_code']);
     $subject_name = trim($_POST['subject_name']);
@@ -50,11 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
         $stmt->bind_param('ssi', $subject_code, $subject_name, $subject_id);
 
         if ($stmt->execute()) {
-            $success_message = renderAlert(["Subject updated successfully!"], 'success');
-            header("Location: ../subject/add.php"); // Redirect to add.php after successful update
+            // Redirect after successful update
+            header("Cache-Control: no-cache, no-store, must-revalidate"); // Clear cache to avoid issues
+            header("Location: ../subject/add.php");
             exit;
         } else {
-            $error_message = renderAlert(["Error updating subject. Please try again."], 'danger');
+            $error_message = renderAlert(["Error updating subject: " . $stmt->error], 'danger');
         }
     } else {
         $error_message = renderAlert($errors, 'danger');
@@ -73,6 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
         </ol>
     </nav>
 
+    <!-- Display error or success messages -->
     <?php if (!empty($error_message)): ?>
         <?php echo $error_message; ?>
     <?php endif; ?>
@@ -81,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
         <?php echo $success_message; ?>
     <?php endif; ?>
 
+    <!-- Edit Subject Form -->
     <form method="post" action="">
         <div class="form-floating mb-3">
             <input type="text" class="form-control" id="subject_code" name="subject_code" placeholder="Subject Code" value="<?php echo htmlspecialchars($subject_code); ?>" required>
@@ -90,10 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
             <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Subject Name" value="<?php echo htmlspecialchars($subject_name); ?>" required>
             <label for="subject_name">Subject Name</label>
         </div>
-        <div class="mb-3">
-            <button type="submit" name="update_subject" class="btn btn-primary w-100">Update Subject</button>
+        <div class="mb-3 d-flex gap-2">
+            <!-- Submit Button -->
+            <button type="submit" name="update_subject" class="btn btn-primary flex-grow-1">Update Subject</button>
+            <!-- Cancel Button -->
+            <a href="../subject/add.php" class="btn btn-secondary flex-grow-1">Cancel</a>
         </div>
     </form>
 </main>
 
 <?php require_once '../partials/footer.php'; ?>
+<?php ob_end_flush(); // End output buffering ?>
