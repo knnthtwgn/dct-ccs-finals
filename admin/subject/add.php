@@ -1,5 +1,5 @@
 <?php
-require_once(_DIR_ . '/../../helpers.php'); // Import functions
+require_once(_DIR_ . '/../../functions.php'); // Import functions
 require_once '../partials/header.php'; // Import header
 require_once '../partials/side-bar.php'; // Import sidebar
 guardSession(); // Ensure the user is authenticated
