@@ -145,4 +145,53 @@ function renderAlert($messages, $type = 'danger') {
 
     return $html;
 }
+
+function generateValidStudentId($original_id) {
+    // Truncate to the first 4 characters
+    return substr($original_id, 0, 4);
+}
+
+function validateStudentData($student_data) {
+    $errors = [];
+    if (empty($student_data['student_id'])) {
+        $errors[] = "Student ID is required.";
+    }
+    if (empty($student_data['first_name'])) {
+        $errors[] = "First Name is required.";
+    }
+    if (empty($student_data['last_name'])) {
+        $errors[] = "Last Name is required.";
+    }
+
+   
+    return $errors;
+}
+
+function checkDuplicateStudentData($student_data) {
+    $connection = getDatabaseConnection();
+    $query = "SELECT * FROM students WHERE student_id = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('s', $student_data['student_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        return "Student ID already exists.";
+    }
+
+    return '';
+}
+
+function generateUniqueIdForStudents() {
+    $connection = getDatabaseConnection();
+
+    $query = "SELECT MAX(id) AS max_id FROM students";
+    $result = $connection->query($query);
+    $row = $result->fetch_assoc();
+    $max_id = $row['max_id'];
+
+    $connection->close();
+
+    return $max_id + 1; 
+}
 ?>

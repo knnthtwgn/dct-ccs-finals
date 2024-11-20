@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error_message = renderAlert([$duplicateError], 'danger'); // Show duplicate error
         } else {
             // Proceed with database insertion if no duplicates found
-            $connection = db_connect(); // Establish database connection
+            $connection = getDatabaseConnection(); // Establish database connection
 
             // Generate a unique student ID for the database entry
             $student_id_unique = generateUniqueIdForStudents();
@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
+
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
     
     <h1 class="h2">Register a New Student</h1>
