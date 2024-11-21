@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
  * @return mysqli|null Database connection object, or null if connection fails.
  */
 function getDatabaseConnection() {
-    $db_config = [
+    $DatabaseConfig = [
         'host' => 'localhost',
         'user' => 'root',
         'password' => '',
@@ -20,10 +20,10 @@ function getDatabaseConnection() {
 
     // Create a new database connection.
     $connection = new mysqli(
-        $db_config['host'], 
-        $db_config['user'], 
-        $db_config['password'], 
-        $db_config['database']
+        $DatabaseConfig['host'], 
+        $DatabaseConfig['user'], 
+        $DatabaseConfig['password'], 
+        $DatabaseConfig['database']
     );
 
     // Check if connection was successful and log error if not.
