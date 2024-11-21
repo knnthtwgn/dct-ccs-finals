@@ -13,13 +13,18 @@ error_reporting(E_ALL);
 $error_message = '';
 $success_message = '';
 
+// Initialize form data variables
+$student_id = $_POST['student_id'] ?? '';
+$first_name = $_POST['first_name'] ?? '';
+$last_name = $_POST['last_name'] ?? '';
+
 // Handle form submission when method is POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Collect and sanitize input data for student details
     $student_data = [
-        'student_id' => generateValidStudentId(trim($_POST['student_id'] ?? '')), // Ensure student ID is valid
-        'first_name' => trim($_POST['first_name'] ?? ''), // Clean first name input
-        'last_name' => trim($_POST['last_name'] ?? '') // Clean last name input
+        'student_id' => generateValidStudentId(trim($student_id)), // Ensure student ID is valid
+        'first_name' => trim($first_name), // Clean first name input
+        'last_name' => trim($last_name) // Clean last name input
     ];
 
     $errors = validateStudentData($student_data);
@@ -49,6 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Execute the query and check for success
                 if ($stmt->execute()) {
                     $success_message = renderAlert(["Student successfully registered!"], 'success'); // Show success message
+                    // Clear form values after successful registration
+                    $student_id = '';
+                    $first_name = '';
+                    $last_name = '';
                 } else {
                     // Handle query execution failure
                     $error_message = renderAlert(["Failed to register student. Error: " . $stmt->error], 'danger');
@@ -93,17 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="post" action="">
         <div class="mb-3">
             <label for="student_id" class="form-label">Student ID</label>
-            <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Enter Student ID" value="<?php echo htmlspecialchars($_POST['student_id'] ?? ''); ?>">
+            <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Enter Student ID" value="<?php echo htmlspecialchars($student_id); ?>">
         </div>
 
         <div class="mb-3">
             <label for="first_name" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter First Name" value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>">
+            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter First Name" value="<?php echo htmlspecialchars($first_name); ?>">
         </div>
 
         <div class="mb-3">
             <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter Last Name" value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>">
+            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter Last Name" value="<?php echo htmlspecialchars($last_name); ?>">
         </div>
         <div class="mb-3">
             <button type="submit" class="btn btn-primary w-100">Add Student</button>
