@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
  * @return mysqli|null Database connection object, or null if connection fails.
  */
 function getDatabaseConnection() {
-    $db_config = [
+    $DatabaseConfig = [
         'host' => 'localhost',
         'user' => 'root',
         'password' => '',
@@ -20,10 +20,10 @@ function getDatabaseConnection() {
 
     // Create a new database connection.
     $connection = new mysqli(
-        $db_config['host'], 
-        $db_config['user'], 
-        $db_config['password'], 
-        $db_config['database']
+        $DatabaseConfig['host'], 
+        $DatabaseConfig['user'], 
+        $DatabaseConfig['password'], 
+        $DatabaseConfig['database']
     );
 
     // Check if connection was successful and log error if not.
@@ -67,6 +67,15 @@ function authenticateUser($email, $password) {
     }
 
     return false; // Return false if user not found.
+}
+
+function logout_user() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(); 
+    }
+    session_destroy(); 
+    header("Location:../index.php"); // Redirect to login page
+    exit();
 }
 
 
@@ -145,6 +154,7 @@ function renderAlert($messages, $type = 'danger') {
 
     return $html;
 }
+
 function generateValidStudentId($original_id) {
     // Truncate to the first 4 characters
     return substr($original_id, 0, 4);
@@ -162,7 +172,7 @@ function validateStudentData($student_data) {
         $errors[] = "Last Name is required.";
     }
 
-    // Removed the var_dump debug
+
     return $errors;
 }
 
@@ -178,14 +188,13 @@ function checkDuplicateStudentData($student_data) {
         return "Student ID already exists.";
     }
 
-    // Removed the var_dump debug
+
     return '';
 }
 
 function generateUniqueIdForStudents() {
     $connection = getDatabaseConnection();
 
-    // Find the maximum current ID and add 1 to it
     $query = "SELECT MAX(id) AS max_id FROM students";
     $result = $connection->query($query);
     $row = $result->fetch_assoc();
@@ -193,8 +202,7 @@ function generateUniqueIdForStudents() {
 
     $connection->close();
 
-    return $max_id + 1; // Generate the next unique ID
-}
+
 function getSelectedStudentData($student_id) {
     $connection = getDatabaseConnection();
     $query = "SELECT * FROM students WHERE id = ?";
