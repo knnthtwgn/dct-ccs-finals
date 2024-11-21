@@ -36,23 +36,17 @@ $success_message = '';
 
 // Handle the form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
-    $subject_code = trim($_POST['subject_code']);
-    $subject_name = trim($_POST['subject_name']);
+    $subject_name = trim($_POST['subject_name']); // Only subject_name is editable
 
     $errors = [];
-    if (empty($subject_code)) {
-        $errors[] = "Subject Code is required.";
-    } elseif (strlen($subject_code) > 4) {
-        $errors[] = "Subject Code cannot be longer than 4 characters.";
-    }
     if (empty($subject_name)) {
         $errors[] = "Subject Name is required.";
     }
 
     if (empty($errors)) {
-        $query = "UPDATE subjects SET subject_code = ?, subject_name = ? WHERE id = ?";
+        $query = "UPDATE subjects SET subject_name = ? WHERE id = ?";
         $stmt = $connection->prepare($query);
-        $stmt->bind_param('ssi', $subject_code, $subject_name, $subject_id);
+        $stmt->bind_param('si', $subject_name, $subject_id);
 
         if ($stmt->execute()) {
             // Redirect after successful update
@@ -91,10 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_subject'])) {
     <!-- Edit Subject Form -->
     <form method="post" action="">
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="subject_code" name="subject_code" placeholder="Subject Code" value="<?php echo htmlspecialchars($subject_code); ?>" required>
+            <!-- Subject Code is disabled -->
+            <input type="text" class="form-control" id="subject_code" name="subject_code" placeholder="Subject Code" value="<?php echo htmlspecialchars($subject_code); ?>" disabled>
             <label for="subject_code">Subject Code</label>
         </div>
         <div class="form-floating mb-3">
+            <!-- Subject Name is editable -->
             <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Subject Name" value="<?php echo htmlspecialchars($subject_name); ?>" required>
             <label for="subject_name">Subject Name</label>
         </div>
