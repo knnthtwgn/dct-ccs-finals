@@ -202,7 +202,6 @@ function generateUniqueIdForStudents() {
 
     $connection->close();
 
-}
 
 function getSelectedStudentData($student_id) {
     $connection = getDatabaseConnection();
@@ -218,4 +217,4 @@ function getSelectedStudentData($student_id) {
 
     return $student;
 }
-?>
+
