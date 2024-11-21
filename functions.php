@@ -69,6 +69,15 @@ function authenticateUser($email, $password) {
     return false; // Return false if user not found.
 }
 
+function logout_user() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(); 
+    }
+    session_destroy(); 
+    header("Location:../index.php"); // Redirect to login page
+    exit();
+}
+
 
 function guard() {
     if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
@@ -193,6 +202,21 @@ function generateUniqueIdForStudents() {
     $connection->close();
 
     return $max_id + 1; 
+}
+
+function getSelectedStudentData($student_id) {
+    $connection = getDatabaseConnection();
+    $query = "SELECT * FROM students WHERE id = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param('i', $student_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $student = $result->fetch_assoc();
+
+    $stmt->close();
+    $connection->close();
+
+    return $student;
 }
 
 function getSelectedStudentData($student_id) {
