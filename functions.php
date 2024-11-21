@@ -203,12 +203,7 @@ function generateUniqueIdForStudents() {
 
     return $max_id + 1; 
 }
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
-=======
 
 function getSelectedStudentData($student_id) {
     $connection = getDatabaseConnection();
@@ -225,23 +220,3 @@ function getSelectedStudentData($student_id) {
     return $student;
 }
 
->>>>>>> 030e315222f3b40872108f3e0c974eafdb96d8a7
-function getSelectedStudentData($student_id) {
-    $connection = getDatabaseConnection();
-    $query = "SELECT * FROM students WHERE id = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param('i', $student_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $student = $result->fetch_assoc();
-
-    $stmt->close();
-    $connection->close();
-
-    return $student;
-}
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-?>
