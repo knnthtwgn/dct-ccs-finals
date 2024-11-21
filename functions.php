@@ -195,6 +195,10 @@ function generateUniqueIdForStudents() {
 
     return $max_id + 1; // Generate the next unique ID
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 function getSelectedStudentData($student_id) {
     $connection = getDatabaseConnection();
     $query = "SELECT * FROM students WHERE id = ?";
@@ -209,4 +213,8 @@ function getSelectedStudentData($student_id) {
 
     return $student;
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 ?>
