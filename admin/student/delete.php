@@ -93,4 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_student'])) {
 </main>
 
 <?php require_once '../partials/footer.php'; ?>
+<<<<<<< HEAD
 <?php ob_end_flush(); ?>
+=======
+<?php ob_end_flush(); ?>
+>>>>>>> 62861279c0e359ea7b3284ef3abee38cf453b791
