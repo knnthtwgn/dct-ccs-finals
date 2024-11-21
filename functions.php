@@ -172,7 +172,7 @@ function validateStudentData($student_data) {
         $errors[] = "Last Name is required.";
     }
 
-   
+
     return $errors;
 }
 
@@ -188,6 +188,7 @@ function checkDuplicateStudentData($student_data) {
         return "Student ID already exists.";
     }
 
+
     return '';
 }
 
@@ -201,23 +202,6 @@ function generateUniqueIdForStudents() {
 
     $connection->close();
 
-    return $max_id + 1; 
-}
-
-function getSelectedStudentData($student_id) {
-    $connection = getDatabaseConnection();
-    $query = "SELECT * FROM students WHERE id = ?";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param('i', $student_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $student = $result->fetch_assoc();
-
-    $stmt->close();
-    $connection->close();
-
-    return $student;
-}
 
 function getSelectedStudentData($student_id) {
     $connection = getDatabaseConnection();
