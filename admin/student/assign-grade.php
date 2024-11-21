@@ -1,5 +1,6 @@
 <?php
-
+ob_start(); 
+$title = "Assign Grade"; // Page title for the header
 require_once '../../functions.php';
 require_once '../partials/header.php';
 require_once '../partials/side-bar.php';
@@ -85,7 +86,7 @@ if (!empty($record_id)) {
 ?>
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-5">
-
+    <h1 class="h2">Assign Grade to Subjects</h1>
 
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -131,7 +132,7 @@ if (!empty($record_id)) {
             </div>
         </div>
     <?php endif; ?>
-
+</main> 
 
 <?php require_once '../partials/footer.php'; ?>
 <?php ob_end_flush(); // Send the output buffer contents ?>
