@@ -176,4 +176,3 @@ if (isset($_GET['id'])) {
     <?php endif; ?>
 </main>
 
-<?php require_once '../partials/footer.php'; ?>
