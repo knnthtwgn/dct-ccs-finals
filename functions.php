@@ -69,6 +69,15 @@ function authenticateUser($email, $password) {
     return false; // Return false if user not found.
 }
 
+function logout_user() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start(); 
+    }
+    session_destroy(); 
+    header("Location:../index.php"); // Redirect to login page
+    exit();
+}
+
 
 function guard() {
     if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
